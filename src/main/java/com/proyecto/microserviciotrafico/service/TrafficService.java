@@ -45,6 +45,8 @@ public class TrafficService {
     public void moveCars() {
         Random rd = new Random();
         List<Car> newCars = new ArrayList<>();
+        List<Car> carsToRemove = new ArrayList<>();
+
         for (Car car : cars) {
             if (car.getDirection().equals("EAST")) {
                 int nextX = car.getX() + 1;
@@ -71,13 +73,13 @@ public class TrafficService {
                     car.setX(nextX);
                 }
 
-                // Si el coche se sale del mapa, eliminarlo y crear uno nuevo
+                // Si el coche se sale del mapa, marcarlo para eliminar y crear uno nuevo
                 if (car.getX() >= GRID_WIDTH) {
-                    cars.remove(car);
+                    carsToRemove.add(car);
                     newCars.add(createNewCar("WEST"));
                 }
             } else if (car.getDirection().equals("SOUTH")) {
-                int nextY = car.getY() -1;
+                int nextY = car.getY() + 1;
 
                 // Verificar si hay un semáforo en la siguiente casilla
                 TrafficLight trafficLight = getTrafficLightAt(car.getX(), nextY);
@@ -94,13 +96,13 @@ public class TrafficService {
                     car.setY(nextY);
                 }
 
-                // Si el coche se sale del mapa, eliminarlo y crear uno nuevo
+                // Si el coche se sale del mapa, marcarlo para eliminar y crear uno nuevo
                 if (car.getY() >= GRID_HEIGHT) {
-                    cars.remove(car);
+                    carsToRemove.add(car);
                     newCars.add(createNewCar("NORTH"));
                 }
             } else if (car.getDirection().equals("WEST")) {
-                int nextX = car.getX() -1;
+                int nextX = car.getX() - 1;
 
                 // Verificar si hay un semáforo en la siguiente casilla
                 TrafficLight trafficLight = getTrafficLightAt(nextX, car.getY());
@@ -124,13 +126,13 @@ public class TrafficService {
                     car.setX(nextX);
                 }
 
-                // Si el coche se sale del mapa, eliminarlo y crear uno nuevo
+                // Si el coche se sale del mapa, marcarlo para eliminar y crear uno nuevo
                 if (car.getX() < 0) {
-                    cars.remove(car);
+                    carsToRemove.add(car);
                     newCars.add(createNewCar("EAST"));
                 }
-            }else if (car.getDirection().equals("NORTH")) {
-                int nextY = car.getY() +1;
+            } else if (car.getDirection().equals("NORTH")) {
+                int nextY = car.getY() - 1;
 
                 // Verificar si hay un semáforo en la siguiente casilla
                 TrafficLight trafficLight = getTrafficLightAt(car.getX(), nextY);
@@ -147,14 +149,17 @@ public class TrafficService {
                     car.setY(nextY);
                 }
 
-                // Si el coche se sale del mapa, eliminarlo y crear uno nuevo
-                if (car.getY() >= GRID_HEIGHT) {
-                    cars.remove(car);
+                // Si el coche se sale del mapa, marcarlo para eliminar y crear uno nuevo
+                if (car.getY() < 0) {
+                    carsToRemove.add(car);
                     newCars.add(createNewCar("SOUTH"));
                 }
             }
         }
-        cars.removeIf(car -> car.getX() < 0 || car.getX() >= GRID_WIDTH || car.getY() < 0 || car.getY() >= GRID_HEIGHT);
+
+        // Eliminar coches que se salieron del mapa
+        cars.removeAll(carsToRemove);
+        // Agregar nuevos coches
         cars.addAll(newCars);
     }
 
@@ -164,11 +169,11 @@ public class TrafficService {
         switch (direction) {
             case "EAST":
                 x = 0;
-                y = 3;
+                y = rd.nextInt(GRID_HEIGHT);
                 break;
             case "WEST":
                 x = GRID_WIDTH - 1;
-                y = 3;
+                y = rd.nextInt(GRID_HEIGHT);
                 break;
             case "NORTH":
                 x = rd.nextInt(GRID_WIDTH);
