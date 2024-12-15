@@ -23,15 +23,11 @@ public class TrafficService {
         trafficLights = new ArrayList<>();
 
         // Inicializar coches de prueba
-        cars.add(new Car("car1", 0, 3, "EAST")); // En la carretera horizontal
-        cars.add(new Car("car2", 1, 6, "SHOUT"));
-        cars.add(new Car("car3", 3, 6, "SHOUT"));
-        cars.add(new Car("car4", 5, 6, "SHOUT"));
-        cars.add(new Car("car5", 7, 6, "SHOUT"));
-        cars.add(new Car("car6", 1, 0, "WEST"));
-        cars.add(new Car("car7", 3, 0, "NORTH"));
-        cars.add(new Car("car8", 5, 0, "NORTH"));
-        cars.add(new Car("car9", 7, 0, "NORTH"));
+        cars.add(new Car("car1", 0, 3, "EAST", "red")); // En la carretera horizontal
+        cars.add(new Car("car2", 1, 0, "SOUTH", "blue"));
+        cars.add(new Car("car4", 5, 0, "SOUTH", "green"));
+        cars.add(new Car("car6", 0, 3, "WEST", "yellow"));
+        cars.add(new Car("car9", 7, 6, "NORTH", "black"));
 
         // Inicializar semáforos en puntos específicos del tablero
         trafficLights.add(new TrafficLight("tl1", 3, 3, "RED"));
@@ -48,143 +44,141 @@ public class TrafficService {
         List<Car> carsToRemove = new ArrayList<>();
 
         for (Car car : cars) {
-            if (car.getDirection().equals("EAST")) {
-                int nextX = car.getX() + 1;
+            switch (car.getDirection()) {
+                case "EAST":
+                    int nextXEast = car.getX() + 1;
 
-                // Verificar si hay un semáforo en la siguiente casilla
-                TrafficLight trafficLight = getTrafficLightAt(nextX, car.getY());
-                if (trafficLight != null && trafficLight.getState().equals("RED")) {
-                    continue; // Si el semáforo está en rojo, el coche se detiene
-                }
-
-                // Verificar si hay un coche en la siguiente casilla
-                if (getCarAt(nextX, car.getY()) != null) {
-                    continue; // Si hay un coche, el coche se detiene
-                }
-
-                // Si alcanza una intersección, puede girar
-                if (isIntersection(nextX, car.getY())) {
-                    if (rd.nextBoolean()) {
-                        car.setDirection("SOUTH");
+                    // Check if there is a traffic light in the next cell
+                    TrafficLight trafficLightEast = getTrafficLightAt(nextXEast, car.getY());
+                    if (trafficLightEast != null && trafficLightEast.getState().equals("RED")) {
+                        continue; // If the traffic light is red, the car stops
                     }
-                }
 
-                if (isRoad(nextX, car.getY())) {
-                    car.setX(nextX);
-                }
+                    // Check if there is a car in the next cell
+                    Car nextCarEast = getCarAt(nextXEast, car.getY());
+                    if (nextCarEast != null && nextCarEast.getDirection().equals("EAST")) {
+                        continue; // If there is a car in the same direction, the car stops
+                    }
 
-                // Si el coche se sale del mapa, marcarlo para eliminar y crear uno nuevo
-                if (car.getX() >= GRID_WIDTH) {
-                    carsToRemove.add(car);
-                    newCars.add(createNewCar("WEST"));
-                }
-            } else if (car.getDirection().equals("SOUTH")) {
-                int nextY = car.getY() + 1;
+                    if (isRoad(nextXEast, car.getY())) {
+                        car.setX(nextXEast);
+                    }
 
-                // Verificar si hay un semáforo en la siguiente casilla
-                TrafficLight trafficLight = getTrafficLightAt(car.getX(), nextY);
-                if (trafficLight != null && trafficLight.getState().equals("RED")) {
-                    continue; // Si el semáforo está en rojo, el coche se detiene
-                }
-
-                // Verificar si hay un coche en la siguiente casilla
-                if (getCarAt(car.getX(), nextY) != null) {
-                    continue; // Si hay un coche, el coche se detiene
-                }
-
-                if (isRoad(car.getX(), nextY)) {
-                    car.setY(nextY);
-                }
-
-                // Si el coche se sale del mapa, marcarlo para eliminar y crear uno nuevo
-                if (car.getY() >= GRID_HEIGHT) {
-                    carsToRemove.add(car);
-                    newCars.add(createNewCar("NORTH"));
-                }
-            } else if (car.getDirection().equals("WEST")) {
-                int nextX = car.getX() - 1;
-
-                // Verificar si hay un semáforo en la siguiente casilla
-                TrafficLight trafficLight = getTrafficLightAt(nextX, car.getY());
-                if (trafficLight != null && trafficLight.getState().equals("RED")) {
-                    continue; // Si el semáforo está en rojo, el coche se detiene
-                }
-
-                // Verificar si hay un coche en la siguiente casilla
-                if (getCarAt(nextX, car.getY()) != null) {
-                    continue; // Si hay un coche, el coche se detiene
-                }
-
-                // Si alcanza una intersección, puede girar
-                if (isIntersection(nextX, car.getY())) {
-                    if (rd.nextBoolean()) {
+                    // Check if the car is at an intersection and has a 50% chance to turn right
+                    if (isIntersection(nextXEast, car.getY()) && rd.nextBoolean()) {
                         car.setDirection("NORTH");
                     }
-                }
 
-                if (isRoad(nextX, car.getY())) {
-                    car.setX(nextX);
-                }
+                    // If the car goes off the map, mark it for removal and create a new one
+                    if (car.getX() >= GRID_WIDTH) {
+                        carsToRemove.add(car);
+                        newCars.add(createNewCar("EAST", 0, car.getY(), car.getColor()));
+                    }
+                    break;
 
-                // Si el coche se sale del mapa, marcarlo para eliminar y crear uno nuevo
-                if (car.getX() < 0) {
-                    carsToRemove.add(car);
-                    newCars.add(createNewCar("EAST"));
-                }
-            } else if (car.getDirection().equals("NORTH")) {
-                int nextY = car.getY() - 1;
+                case "WEST":
+                    int nextXWest = car.getX() - 1;
 
-                // Verificar si hay un semáforo en la siguiente casilla
-                TrafficLight trafficLight = getTrafficLightAt(car.getX(), nextY);
-                if (trafficLight != null && trafficLight.getState().equals("RED")) {
-                    continue; // Si el semáforo está en rojo, el coche se detiene
-                }
+                    // Check if there is a traffic light in the next cell
+                    TrafficLight trafficLightWest = getTrafficLightAt(nextXWest, car.getY());
+                    if (trafficLightWest != null && trafficLightWest.getState().equals("RED")) {
+                        continue; // If the traffic light is red, the car stops
+                    }
 
-                // Verificar si hay un coche en la siguiente casilla
-                if (getCarAt(car.getX(), nextY) != null) {
-                    continue; // Si hay un coche, el coche se detiene
-                }
+                    // Check if there is a car in the next cell
+                    Car nextCarWest = getCarAt(nextXWest, car.getY());
+                    if (nextCarWest != null && nextCarWest.getDirection().equals("WEST")) {
+                        continue; // If there is a car in the same direction, the car stops
+                    }
 
-                if (isRoad(car.getX(), nextY)) {
-                    car.setY(nextY);
-                }
+                    if (isRoad(nextXWest, car.getY())) {
+                        car.setX(nextXWest);
+                    }
 
-                // Si el coche se sale del mapa, marcarlo para eliminar y crear uno nuevo
-                if (car.getY() < 0) {
-                    carsToRemove.add(car);
-                    newCars.add(createNewCar("SOUTH"));
-                }
+                    // Check if the car is at an intersection and has a 50% chance to turn right
+                    if (isIntersection(nextXWest, car.getY()) && rd.nextBoolean()) {
+                        car.setDirection("SOUTH");
+                    }
+
+                    // If the car goes off the map, mark it for removal and create a new one
+                    if (car.getX() < 0) {
+                        carsToRemove.add(car);
+                        newCars.add(createNewCar("WEST", GRID_WIDTH - 1, car.getY(), car.getColor()));
+                    }
+                    break;
+
+                case "NORTH":
+                    int nextYNorth = car.getY() - 1;
+
+                    // Check if there is a traffic light in the next cell
+                    TrafficLight trafficLightNorth = getTrafficLightAt(car.getX(), nextYNorth);
+                    if (trafficLightNorth != null && trafficLightNorth.getState().equals("RED")) {
+                        continue; // If the traffic light is red, the car stops
+                    }
+
+                    // Check if there is a car in the next cell
+                    Car nextCarNorth = getCarAt(car.getX(), nextYNorth);
+                    if (nextCarNorth != null && nextCarNorth.getDirection().equals("NORTH")) {
+                        continue; // If there is a car in the same direction, the car stops
+                    }
+
+                    if (isRoad(car.getX(), nextYNorth)) {
+                        car.setY(nextYNorth);
+                    }
+
+                    // Check if the car is at an intersection and has a 50% chance to turn right
+                    if (isIntersection(car.getX(), nextYNorth) && rd.nextBoolean()) {
+                        car.setDirection("WEST");
+                    }
+
+                    // If the car goes off the map, mark it for removal and create a new one
+                    if (car.getY() < 0) {
+                        carsToRemove.add(car);
+                        newCars.add(createNewCar("NORTH", car.getX(), GRID_HEIGHT - 1, car.getColor()));
+                    }
+                    break;
+
+                case "SOUTH":
+                    int nextYSouth = car.getY() + 1;
+
+                    // Check if there is a traffic light in the next cell
+                    TrafficLight trafficLightSouth = getTrafficLightAt(car.getX(), nextYSouth);
+                    if (trafficLightSouth != null && trafficLightSouth.getState().equals("RED")) {
+                        continue; // If the traffic light is red, the car stops
+                    }
+
+                    // Check if there is a car in the next cell
+                    Car nextCarSouth = getCarAt(car.getX(), nextYSouth);
+                    if (nextCarSouth != null && nextCarSouth.getDirection().equals("SOUTH")) {
+                        continue; // If there is a car in the same direction, the car stops
+                    }
+
+                    if (isRoad(car.getX(), nextYSouth)) {
+                        car.setY(nextYSouth);
+                    }
+
+                    // Check if the car is at an intersection and has a 50% chance to turn right
+                    if (isIntersection(car.getX(), nextYSouth) && rd.nextBoolean()) {
+                        car.setDirection("EAST");
+                    }
+
+                    // If the car goes off the map, mark it for removal and create a new one
+                    if (car.getY() >= GRID_HEIGHT) {
+                        carsToRemove.add(car);
+                        newCars.add(createNewCar("SOUTH", car.getX(), 0, car.getColor()));
+                    }
+                    break;
             }
         }
 
-        // Eliminar coches que se salieron del mapa
+        // Remove cars that went off the map
         cars.removeAll(carsToRemove);
-        // Agregar nuevos coches
+        // Add new cars
         cars.addAll(newCars);
     }
 
-    private Car createNewCar(String direction) {
-        Random rd = new Random();
-        int x = 0, y = 0;
-        switch (direction) {
-            case "EAST":
-                x = 0;
-                y = rd.nextInt(GRID_HEIGHT);
-                break;
-            case "WEST":
-                x = GRID_WIDTH - 1;
-                y = rd.nextInt(GRID_HEIGHT);
-                break;
-            case "NORTH":
-                x = rd.nextInt(GRID_WIDTH);
-                y = GRID_HEIGHT - 1;
-                break;
-            case "SOUTH":
-                x = rd.nextInt(GRID_WIDTH);
-                y = 0;
-                break;
-        }
-        return new Car("car" + (cars.size() + 1), x, y, direction);
+    private Car createNewCar(String direction, int x, int y, String color) {
+        return new Car("car" + (cars.size() + 1), x, y, direction, color);
     }
 
     private Car getCarAt(int x, int y) {

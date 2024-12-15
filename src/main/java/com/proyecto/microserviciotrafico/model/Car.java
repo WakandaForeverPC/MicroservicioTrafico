@@ -5,12 +5,14 @@ public class Car {
     private int x;
     private int y;
     private String direction;
+    private String color;
 
-    public Car(String id, int x, int y, String direction) {
+    public Car(String id, int x, int y, String direction, String color) {
         this.id = id;
         this.x = x;
         this.y = y;
         this.direction = direction;
+        this.color = color;
     }
 
     public String getId() {
@@ -43,5 +45,11 @@ public class Car {
 
     public void setDirection(String direction) {
         this.direction = direction;
+    }
+    public String getColor(){
+        return color;
+    }
+    public void setColor(String color){
+        this.color = color;
     }
 }
