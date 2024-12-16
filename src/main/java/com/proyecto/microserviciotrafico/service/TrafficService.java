@@ -23,10 +23,10 @@ public class TrafficService {
         trafficLights = new ArrayList<>();
 
         // Inicializar coches de prueba
-        cars.add(new Car("car1", 0, 3, "EAST", "red")); // En la carretera horizontal
-        cars.add(new Car("car2", 1, 0, "SOUTH", "blue"));
-        cars.add(new Car("car4", 5, 0, "SOUTH", "green"));
-        cars.add(new Car("car6", 0, 3, "WEST", "yellow"));
+        cars.add(new Car("car1", 0, 3, "EAST", "#98b8c6")); // En la carretera horizontal
+        cars.add(new Car("car2", 1, 0, "SOUTH", "#9b111e"));
+        cars.add(new Car("car4", 5, 0, "SOUTH", "#fafbfd"));
+        cars.add(new Car("car6", 0, 3, "WEST", "#308446"));
         cars.add(new Car("car9", 7, 6, "NORTH", "black"));
 
         // Inicializar semáforos en puntos específicos del tablero
