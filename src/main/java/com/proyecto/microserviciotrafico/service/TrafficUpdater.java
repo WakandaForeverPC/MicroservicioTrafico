@@ -12,12 +12,12 @@ public class TrafficUpdater {
         this.trafficService = trafficService;
     }
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 2000)
     public void updateCars() {
         trafficService.moveCars();
     }
 
-    @Scheduled(fixedRate = 3000)
+    @Scheduled(fixedRate = 4000)
     public void updateTrafficLights() {
         trafficService.updateTrafficLights();
     }
